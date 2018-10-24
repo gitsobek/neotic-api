@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Neotic:api - Wyślij mail</title>
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.css" />
+  <link rel="stylesheet" href="css/style.css">
+  <script>
+    if (window.history.replaceState) {
+      window.history.replaceState(null, null, window.location.href);
+    }
+
+    function directToHomepage() {
+      window.location.replace("http://localhost:3000/");
+    }
+  </script>
+</head>
+<body>
+  <div class="container">
+    <h1 class="brand"><span>neotic:api</span> Opcja wysłania maila</h1>
+    <div class="wrapper animated bounceInLeft">
+      <div class="company-info">
+        <img src="img/neotic-logo-nav.png">
+        <p>Mailer wyśle wiadomość do każdej osoby, która zasubskrybowała strone Neotic.</p>
+        <button id="btn" onclick="directToHomepage()" class="btn-goback" type="submit">Wróć</button>
+      </div>
+      <div class="contact">
+        <h3>Napisz wiadomość</h3>
+        <form method="POST" action="sender">
+          <p>
+            <label>Temat:</label>
+            <input type="text" name="title">
+          </p>
+          <p class="full">
+            <label>Treść:</label>
+            <textarea name="message" rows="5"></textarea>
+          </p>
+          <p class="full">
+            <button type="submit">Wyślij</button>
+          </p>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
