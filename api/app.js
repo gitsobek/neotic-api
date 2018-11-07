@@ -6,11 +6,16 @@ const mongoose = require('mongoose');
 const path = require('path');
 const exphbs = require('express-handlebars');
 
-const emailRoutes = require('./api/controllers/emailNotifications');
-const senderRoutes = require('./api/controllers/emailSender');
+const emailRoutes = require('./controllers/emailNotifications');
+const senderRoutes = require('./controllers/emailSender');
+
+import songs from './routes/songs';
+
+import dbConfig from './config/database';
+import { notFound, catchErrors } from './middlewares/errors';
 
 /* Database */
-mongoose.connect('mongodb://localhost:27017/neotic', {
+mongoose.connect(dbConfig.mongoUrl, {
     useCreateIndex: true,
     useNewUrlParser: true
 });
@@ -27,8 +32,8 @@ app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
 
 /* Static imports */
-app.use(express.static(__dirname + '/api/public/'));
-app.set('views', path.join(__dirname, 'api/views'));
+app.use(express.static(__dirname + '/public/'));
+app.set('views', path.join(__dirname, 'views'));
 
 /* Middlewares */
 app.use(morgan('dev'));
@@ -44,6 +49,11 @@ app.get('/', (req, res) => {
 /* Routes */
 app.use('/emails', emailRoutes);
 app.use('/sender', senderRoutes);
+app.use('/songs', songs());
+
+/* Error handling */
+app.use(notFound);
+app.use(catchErrors);
 
 app.listen(3000, () => {
     console.log('Server is up!');
