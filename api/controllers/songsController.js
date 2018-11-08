@@ -8,13 +8,27 @@ export default {
     },
 
     async findAll(req, res) {
-        const songs = await Song.find().sort({ created: 'desc' });
-        return res.status(200).send({ data: songs });
+        const sort_by = {};
+        sort_by[req.query.sort_by || 'createdAt'] = req.query.order_by || 'desc';
+        const offset = parseInt(req.query.offset) || 0;
+        const per_page = parseInt(req.query.per_page) || 4;
+        const songsPromise =
+            Song.find(req.filters, { score: { $meta: 'textScore' }})
+                .skip(offset)
+                .limit(per_page)
+                .sort(sort_by);
+        const countPromise = Song.count(req.filters);
+        const [songs, count] = await Promise.all([songsPromise, countPromise]);
+        return res.status(200).send({ data: songs, count });
     },
 
     async create(req, res) {
         const song = await new Song({
-            title: req.body.title
+            title: req.body.title,
+            artist: req.body.artist,
+            genre: req.body.genre,
+            imageUrl: req.body.imageUrl,
+            duration: req.body.duration
         }).save();
 
         return res.status(201).send({ data: song, message: 'Song added.'});
