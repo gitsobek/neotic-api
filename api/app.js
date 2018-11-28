@@ -1,14 +1,17 @@
 const express = require('express');
 const morgan = require('morgan');
 const cors = require('cors');
+const cookieParser = require('cookie-parser');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
 const path = require('path');
 const exphbs = require('express-handlebars');
+const passport = require('passport');
 const MongoClient = require('mongodb').MongoClient;
 
 const emailRoutes = require('./controllers/emailNotifications');
 const senderRoutes = require('./controllers/emailSender');
+const authRoutes = require('./routes/auth');
 
 import songs from './routes/songs';
 import tracks from './routes/tracks';
@@ -40,6 +43,8 @@ mongoose.connection.on('error', (err) => {
 export { db };
 const app = express();
 
+require('./config/passport');
+
 /* Render views */
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
@@ -50,9 +55,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 /* Middlewares */
 app.use(morgan('dev'));
+app.use(cookieParser());
 app.use(cors({credentials: true, origin: true}));
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(bodyParser.json());
+app.use(passport.initialize());
 
 /* Mainpage */
 app.get('/', (req, res) => {
@@ -62,6 +69,7 @@ app.get('/', (req, res) => {
 /* Routes */
 app.use('/emails', emailRoutes);
 app.use('/sender', senderRoutes);
+app.use('/auth', authRoutes);
 app.use('/songs', songs());
 app.use('/tracks', tracks());
 
