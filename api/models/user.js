@@ -2,26 +2,25 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-function toLower(str) {
-    return str.toLowerCase();
-}
+const roles = ['admin', 'user'];
 
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
         unique: true,
         required: true,
-        set: toLower
+        lowercase: true
     },
     name: {
         type: String,
         unique: true,
         required: true
     },
-    role: Number,
+    googleId: String,
+    role: { type: String, enum: roles },
+    avatarUrl: String,
     hash: String,
-    salt: String,
-    token: String
+    salt: String
 }, {
     timestamps: true
 });
@@ -46,10 +45,6 @@ UserSchema.methods.generateJwt = function() {
         name: this.name,
         exp: parseInt(expiry.getTime() / 1000),
       }, "MY_SECRET");
-}
-
-UserSchema.methods.saveToken = function(token) {
-    User.token = token
 }
 
 const User = mongoose.model('User', UserSchema);

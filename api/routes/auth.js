@@ -11,5 +11,6 @@ var ctrlAuth = require('../controllers/authController');
 router.post('/register', ctrlAuth.register);
 router.post('/login', ctrlAuth.login);
 router.get('/me', ctrlAuth.me);
+router.post('/google', ctrlAuth.loginGoogle)
 
 module.exports = router;

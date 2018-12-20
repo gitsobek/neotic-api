@@ -7,14 +7,20 @@ const mongoose = require('mongoose');
 const path = require('path');
 const exphbs = require('express-handlebars');
 const passport = require('passport');
+const cookieSession = require('cookie-session')
 const MongoClient = require('mongodb').MongoClient;
+
+import users from './routes/users';
+import songs from './routes/songs';
+import tracks from './routes/tracks';
+require('./config/passport');
 
 const emailRoutes = require('./controllers/emailNotifications');
 const senderRoutes = require('./controllers/emailSender');
 const authRoutes = require('./routes/auth');
+const keys = require('./config/keys');
 
-import songs from './routes/songs';
-import tracks from './routes/tracks';
+require('./models/user');
 
 import dbConfig from './config/database';
 import { notFound, catchErrors } from './middlewares/errors';
@@ -43,8 +49,6 @@ mongoose.connection.on('error', (err) => {
 export { db };
 const app = express();
 
-require('./config/passport');
-
 /* Render views */
 app.engine('handlebars', exphbs());
 app.set('view engine', 'handlebars');
@@ -56,10 +60,22 @@ app.set('views', path.join(__dirname, 'views'));
 /* Middlewares */
 app.use(morgan('dev'));
 app.use(cookieParser());
-app.use(cors({credentials: true, origin: true}));
-app.use(bodyParser.urlencoded({extended: false}));
+// app.use(cors({ credentials: true, origin: true }));
+app.use(cors({
+    origin: 'http://localhost:4200'
+}))
+
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cookieSession({
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    keys: [keys.cookieKey]
+}))
 app.use(passport.initialize());
+app.use(passport.session());
+
+/* Google OAuth route */
+require('./routes/googleAuth')(app);
 
 /* Mainpage */
 app.get('/', (req, res) => {
@@ -70,6 +86,7 @@ app.get('/', (req, res) => {
 app.use('/emails', emailRoutes);
 app.use('/sender', senderRoutes);
 app.use('/auth', authRoutes);
+app.use('/users', users());
 app.use('/songs', songs());
 app.use('/tracks', tracks());
 

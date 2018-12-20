@@ -90,3 +90,51 @@ module.exports.me = async function(req, res) {
         })
     })
 }
+
+module.exports.loginGoogle = async function(req, res) {
+    // passport.authenticate('google', function(err, profile, info) {
+    //     var token;
+
+    //     if (err) {
+    //         res.status(404).json(err);
+    //         return;
+    //     }
+
+    //     if (profile) {
+    //         token = profile.generateJwt();
+    //         console.log(token);
+    //         console.log(profile);
+    //         res.status(200);
+    //         res.json({
+    //             "token" : token,
+    //             user: profile
+    //         });
+    //     } else {
+    //         res.status(401).json(info);
+    //     }
+    // })(req, res);
+    const existingUser = await User.findOne({ googleId: req.body.data.id });
+    var token;
+    if (existingUser) {
+        token = existingUser.generateJwt();
+        res.status(200);
+        res.json({
+            "token" : token,
+            user: existingUser
+        });
+    } else {
+        const user = await new User({
+            email: req.body.data.email,
+            name: req.body.data.name,
+            googleId: req.body.data.id,
+        }).save()
+        .then(result => {
+            token = result.generateJwt();
+            res.status(200);
+            res.json({
+                "token" : token,
+                user: result
+            });
+        })
+    }
+}
