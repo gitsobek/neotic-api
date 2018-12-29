@@ -2,7 +2,8 @@ const mongoose = require('mongoose');
 const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 
-const roles = ['admin', 'user'];
+const roles = ['admin', 'user', 'banned'];
+const ranks = ['Zwykły słuchacz', 'Producent', 'Artysta'];
 
 const UserSchema = new mongoose.Schema({
     email: {
@@ -17,13 +18,25 @@ const UserSchema = new mongoose.Schema({
         required: true
     },
     googleId: String,
-    role: { type: String, enum: roles },
-    avatarUrl: String,
+    role: { type: String, enum: roles, default: 'user' },
+    rank: { type: String, enum: ranks, default: 'Zwykły słuchacz'},
+    avatarUrl: { type: String, default: 'http://localhost:3000/img/avatars/empty-avatar.png' },
+    warns: [
+        {
+            message: String,
+            receivedWhen: Date
+        }
+    ],
+    banReason: String,
+    isOnline: { type: Boolean, default: false},
+    lastTimeOnline: String,
     hash: String,
     salt: String
 }, {
     timestamps: true
 });
+
+UserSchema.index({ name: 'text' });
 
 UserSchema.methods.setPassword = function(password) {
     this.salt = crypto.randomBytes(16).toString('hex');

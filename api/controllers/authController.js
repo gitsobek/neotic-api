@@ -1,5 +1,6 @@
 var passport = require('passport');
 var mongoose = require('mongoose');
+var moment = require('moment');
 
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
@@ -54,6 +55,12 @@ module.exports.login = function(req, res) {
         }
 
         if (user) {
+            if(user.role == 'banned') {
+                res.status(477).send({
+                    message: user.banReason
+                })
+                return;
+            }
             token = user.generateJwt();
 
             res.status(200);
@@ -61,6 +68,12 @@ module.exports.login = function(req, res) {
                 "token" : token,
                 user: user
             });
+            User.findByIdAndUpdate(user._id,
+                { $set: { isOnline: true, lastTimeOnline: moment().locale("pl").format('LLL') }},
+                function (err, data) {
+                    if (err) return next(err);
+                }
+            )
         } else {
             res.status(401).json(info);
         }
@@ -92,41 +105,35 @@ module.exports.me = async function(req, res) {
 }
 
 module.exports.loginGoogle = async function(req, res) {
-    // passport.authenticate('google', function(err, profile, info) {
-    //     var token;
-
-    //     if (err) {
-    //         res.status(404).json(err);
-    //         return;
-    //     }
-
-    //     if (profile) {
-    //         token = profile.generateJwt();
-    //         console.log(token);
-    //         console.log(profile);
-    //         res.status(200);
-    //         res.json({
-    //             "token" : token,
-    //             user: profile
-    //         });
-    //     } else {
-    //         res.status(401).json(info);
-    //     }
-    // })(req, res);
     const existingUser = await User.findOne({ googleId: req.body.data.id });
     var token;
     if (existingUser) {
+        if(existingUser.role == 'banned') {
+            res.status(477).send({
+                message: existingUser.banReason
+            })
+            return;
+        }
         token = existingUser.generateJwt();
         res.status(200);
         res.json({
             "token" : token,
             user: existingUser
         });
+
+        User.findByIdAndUpdate(existingUser._id,
+            { $set: { isOnline: true, lastTimeOnline: moment().locale("pl").format('LLL') }},
+            function (err, data) {
+                if (err) return next(err);
+            }
+        )
+
     } else {
         const user = await new User({
             email: req.body.data.email,
             name: req.body.data.name,
             googleId: req.body.data.id,
+            avatarUrl: req.body.data.image
         }).save()
         .then(result => {
             token = result.generateJwt();
