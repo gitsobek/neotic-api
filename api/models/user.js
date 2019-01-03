@@ -5,6 +5,8 @@ const jwt = require('jsonwebtoken');
 const roles = ['admin', 'user', 'banned'];
 const ranks = ['Zwykły słuchacz', 'Producent', 'Artysta'];
 
+const SongSchema = require('./song');
+
 const UserSchema = new mongoose.Schema({
     email: {
         type: String,
@@ -21,6 +23,9 @@ const UserSchema = new mongoose.Schema({
     role: { type: String, enum: roles, default: 'user' },
     rank: { type: String, enum: ranks, default: 'Zwykły słuchacz'},
     avatarUrl: { type: String, default: 'http://localhost:3000/img/avatars/empty-avatar.png' },
+    uploaded: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
+    playlist: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
+    liked: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
     warns: [
         {
             message: String,
@@ -30,6 +35,7 @@ const UserSchema = new mongoose.Schema({
     banReason: String,
     isOnline: { type: Boolean, default: false},
     lastTimeOnline: String,
+    nextUpload: Number,
     hash: String,
     salt: String
 }, {

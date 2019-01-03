@@ -12,6 +12,10 @@ export default () => {
 
     api.post('/', catchAsync(songsController.create));
 
+    api.post('/:userId', catchAsync(songsController.createByUser));
+
+    api.post('/uploadimage/:id', catchAsync(songsController.uploadImage));
+
     api.put('/:id', catchAsync(songsController.update));
 
     api.delete('/:id', catchAsync(songsController.remove));

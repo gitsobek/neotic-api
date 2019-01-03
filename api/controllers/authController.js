@@ -145,3 +145,24 @@ module.exports.loginGoogle = async function(req, res) {
         })
     }
 }
+
+module.exports.changePassword = async function(req, res) {
+    const user = await User.findOne({ _id: req.params.id });
+
+    if (user.validPassword(req.body.passwordAct)) {
+        user.setPassword(req.body.passwordNew);
+        user.save()
+        .then(result => {
+            res.status(200).json({
+                message: "Hasło zostało zmienione!"
+            });
+        })
+        .catch(err => {
+            res.status(500).json({
+                error: err
+            });
+        });
+    } else {
+        res.status(401).send({ message: 'Podane obecne hasło jest niepoprawne!'})
+    }
+}

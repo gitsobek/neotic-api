@@ -7,6 +7,8 @@ export default () => {
 
     api.get('/:filename', catchAsync(tracksController.findOne));
 
+    api.post('/:id', catchAsync(tracksController.createByUser));
+
     api.post('/', catchAsync(tracksController.create));
 
     return api;
