@@ -7,9 +7,9 @@ export default () => {
 
     api.get('/:filename', catchAsync(tracksController.findOne));
 
-    api.post('/:id', catchAsync(tracksController.createByUser));
-
     api.post('/', catchAsync(tracksController.create));
+
+    api.post('/analysis/:songId', catchAsync(tracksController.analyseSong))
 
     return api;
 }
