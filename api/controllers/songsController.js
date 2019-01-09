@@ -1,9 +1,12 @@
 import Song from '../models/song';
 import User from '../models/user';
+const mongoose = require('mongoose');
 
 const multer = require('multer');
 var slug = require('slug');
 var mkdirp = require('mkdirp');
+
+import _ from 'lodash';
 
 function isDirectoryExists(directory) {
     try {
@@ -62,6 +65,17 @@ export default {
         return res.status(200).send({ data: songs, count });
     },
 
+    async findByPreferences(req, res) {
+
+        const user = await User.findOne({ _id: req.params.userId });
+
+        const songs = await Song.find({_id: { $nin: user.playlist }})
+            .populate('_user');
+
+        return res.status(200).send({ data: songs });
+
+    },
+
     async create(req, res) {
         const song = await new Song({
             title: req.body.title,
@@ -116,6 +130,54 @@ export default {
             })
     },
 
+    async addSongToPlaylist(req, res) {
+        const user = await User.findOneAndUpdate({ _id: req.params.userId },
+            { $push: { playlist: req.params.songId }});
+        if (!user) return next();
+
+        return res.status(200).send({ message: 'Playlista zaktualizowana.' });
+    },
+
+    async removeSongFromPlaylist(req, res) {
+        const user = await User.findOneAndUpdate({ _id: req.params.userId },
+            { $pull: { playlist: req.params.songId }});
+        if (!user) return next();
+
+        return res.status(200).send({ message: 'Playlista zaktualizowana.' });
+    },
+
+    async addSongToLiked(req, res) {
+        const user = await User.findOneAndUpdate({ _id: req.params.userId },
+            { $push: { liked: req.params.songId }});
+        if (!user) return next();
+
+        const song = await Song.findOneAndUpdate({ _id: req.params.songId },
+            { $inc: { likes: 1 }})
+        if (!song) return next();
+
+        return res.status(200).send({ message: 'Lista ulubionych zaktualizowana.' });
+    },
+
+    async removeSongFromLiked(req, res) {
+        const user = await User.findOneAndUpdate({ _id: req.params.userId },
+            { $pull: { liked: req.params.songId }});
+        if (!user) return next();
+
+        const song = await Song.findOneAndUpdate({ _id: req.params.songId },
+            { $inc: { likes: -1 }})
+        if (!song) return next();
+
+        return res.status(200).send({ message: 'Lista ulubionych zaktualizowana.' });
+    },
+
+    async addToUploaded(req, res, next) {
+        const user = await User.findOneAndUpdate({ _id: req.params.userId },
+            { $push: { uploaded: req.params.songId }});
+        if (!user) return next();
+
+        return res.status(200).send({ message: 'Lista uploadów zaktualizowana..' });
+    },
+
     async uploadImage(req, res) {
         const urlEndpointForImages = 'http://localhost:3000/img/songs/';
 
@@ -126,13 +188,13 @@ export default {
             titleName = song.slug;
         });
 
-        var upload2 = uploadWithDynamicDest(slug(artistName), titleName);
+        var upload2 = uploadWithDynamicDest(slug(artistName.toLowerCase()), titleName);
         upload2(req, res, (err) => {
             if (err) {
                 console.log(err);
                 res.status(400).send({ message: 'Błąd podczas uploadu.'})
             } else {
-                Song.findOneAndUpdate({ _id: req.params.id }, { $set: { imageUrl: urlEndpointForImages + slug(artistName) + '/' + titleName + '.' + req.file.filename.split('.')[1] }})
+                Song.findOneAndUpdate({ _id: req.params.id }, { $set: { imageUrl: urlEndpointForImages + slug(artistName.toLowerCase()) + '/' + titleName + '.' + req.file.filename.split('.')[1] }})
                 .exec()
                 .then(result => res.status(200).send({ message: 'Obrazek dodany..' }))
                 .catch(err => {

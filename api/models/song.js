@@ -22,6 +22,12 @@ const Song = new mongoose.Schema({
     timestamps: true
 });
 
+// Song.virtual("users", {
+//     ref: "User",
+//     localField: "_id",
+//     foreignField: "playlist"
+// });
+
 Song.index({ title: 'text' });
 
 Song.plugin(URLSlugs('title', { field: 'slug', update: true }));

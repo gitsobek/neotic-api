@@ -24,8 +24,8 @@ const UserSchema = new mongoose.Schema({
     rank: { type: String, enum: ranks, default: 'Zwykły słuchacz'},
     avatarUrl: { type: String, default: 'http://localhost:3000/img/avatars/empty-avatar.png' },
     uploaded: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
-    playlist: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
-    liked: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
+    playlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }],
+    liked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }],
     warns: [
         {
             message: String,

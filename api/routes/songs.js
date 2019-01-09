@@ -10,6 +10,18 @@ export default () => {
 
     api.get('/', getFilters, catchAsync(songsController.findAll));
 
+    api.post('/findpreference/:userId', catchAsync(songsController.findByPreferences));
+
+    api.post('/:songId/addplaylist/:userId', catchAsync(songsController.addSongToPlaylist));
+
+    api.post('/:songId/removeplaylist/:userId', catchAsync(songsController.removeSongFromPlaylist));
+
+    api.post('/:songId/addliked/:userId', catchAsync(songsController.addSongToLiked));
+
+    api.post('/:songId/removeliked/:userId', catchAsync(songsController.removeSongFromLiked));
+
+    api.post('/:songId/adduploaded/:userId', catchAsync(songsController.addToUploaded));
+
     api.post('/', catchAsync(songsController.create));
 
     api.post('/:userId', catchAsync(songsController.createByUser));

@@ -30,7 +30,8 @@ const upload = multer({
 
 export default {
     async findOne(req, res, next) {
-        const user = await User.findOne({ _id: req.params.id });
+        const user = await User.findOne({ _id: req.params.id })
+            .populate('uploaded playlist liked');
         if (!user) return next();
         return res.status(200).send({ data: user });
     },
@@ -46,6 +47,7 @@ export default {
                 { name: { $regex: "^" + filter, $options: 'i' }},
                 { score: { $meta: 'textScore' }},
                 req.filters)
+                .populate('uploaded playlist liked')
                 .skip(offset)
                 .limit(per_page)
                 .sort(sort_by)
