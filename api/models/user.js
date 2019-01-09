@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema({
     role: { type: String, enum: roles, default: 'user' },
     rank: { type: String, enum: ranks, default: 'Zwykły słuchacz'},
     avatarUrl: { type: String, default: 'http://localhost:3000/img/avatars/empty-avatar.png' },
-    uploaded: [{ type: mongoose.Schema.ObjectId, ref: 'Song' }],
+    uploaded: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }],
     playlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }],
     liked: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Song' }],
     warns: [

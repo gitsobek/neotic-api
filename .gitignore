@@ -77,3 +77,6 @@ typings/
 
 # Output of babelrc
 dist
+
+# Audio files
+api/**/music/

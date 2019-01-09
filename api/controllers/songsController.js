@@ -216,10 +216,17 @@ export default {
     },
 
     async remove(req, res) {
-        const song = await Song.findOne({ slug: req.params.slug });
-        if(!song) return next();
-        await song.remove();
-
-        return res.status(200).send({ message: 'Song removed.'});
+        await Song.findOneAndRemove({ _id: req.params.id }, async function(err, result) {
+            if (err) console.log(err);
+            await User.updateMany({},
+                { $pull: {
+                    playlist: req.params.id,
+                    liked: req.params.id,
+                    uploaded: req.params.id
+                }
+            })
+            .then(result => res.status(200).send({ message: 'Song removed.' }))
+            .catch(err => res.status(500).json({ message: err }))
+        })
     }
 }
