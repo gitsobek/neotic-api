@@ -7,6 +7,7 @@ var slug = require('slug');
 var mkdirp = require('mkdirp');
 
 import _ from 'lodash';
+import song from '../models/song';
 
 function isDirectoryExists(directory) {
     try {
@@ -69,10 +70,54 @@ export default {
 
         const user = await User.findOne({ _id: req.params.userId });
 
-        const songs = await Song.find({_id: { $nin: user.playlist }})
-            .populate('_user');
+        var filteredSongs = {};
+        const sort_by = {};
+        sort_by['likes'] = 'desc';
 
-        return res.status(200).send({ data: songs });
+        const songs = await Song.find({_id: { $nin: user.playlist }})
+            .populate('_user')
+            .sort(sort_by);
+
+        if (req.body.time == 'short') {
+            filteredSongs = songs.filter(song => song.duration < 240)
+        } else if (req.body.time == 'long') {
+            filteredSongs = songs.filter(song => song.duration > 240)
+        } else {
+            res.status(400).send({ message: 'Brak wyników'});
+            return;
+        }
+
+        if (req.body.type == 'instrumental') {
+            filteredSongs = filteredSongs.filter(
+                song => song.genre == 'chill'
+                    || song.genre == 'classic'
+                    || song.genre == 'funk'
+            )
+        } else if (req.body.type == 'dance') {
+            filteredSongs = filteredSongs.filter(
+                song => song.genre == 'edm' || song.genre == 'trance')
+        } else if (req.body.type == 'guitar') {
+            filteredSongs = filteredSongs.filter(song => song.genre == 'rock')
+        } else if (req.body.type == 'party') {
+            filteredSongs = filteredSongs.filter(
+                song => song.genre == 'pop' || song.genre == 'rap'
+            )
+        } else {
+            res.status(400).send({ message: 'Brak wyników'});
+        }
+
+        filteredSongs.forEach(function (song) {
+            console.log(song.title + '-> tempo: ' + song.tempo + ' srednia amp: ' + song.avgBeat);
+            if (req.body.mood == 'relax') {
+                filteredSongs = filteredSongs.filter(song => song.tempo > 0 && song.tempo <= 120)
+            } else if (req.body.mood == 'easy') {
+                filteredSongs = filteredSongs.filter(song => song.tempo > 120 && song.tempo <= 138)
+            } else if (req.body.mood == 'energy') {
+                filteredSongs = filteredSongs.filter(song => song.tempo > 138 && song.tempo <= 200)
+            }
+        });
+
+        return res.status(200).send({ data: filteredSongs });
 
     },
 
