@@ -89,13 +89,14 @@ export default {
 
         if (req.body.type == 'instrumental') {
             filteredSongs = filteredSongs.filter(
-                song => song.genre == 'chill'
-                    || song.genre == 'classic'
-                    || song.genre == 'funk'
+                    song => song.genre == 'classic' || song.genre == 'funk'
             )
         } else if (req.body.type == 'dance') {
             filteredSongs = filteredSongs.filter(
-                song => song.genre == 'edm' || song.genre == 'trance')
+                song => song.genre == 'edm'
+                || song.genre == 'trance'
+                || song.genre == 'chill'
+            )
         } else if (req.body.type == 'guitar') {
             filteredSongs = filteredSongs.filter(song => song.genre == 'rock')
         } else if (req.body.type == 'party') {
@@ -107,15 +108,20 @@ export default {
         }
 
         filteredSongs.forEach(function (song) {
-            console.log(song.title + '-> tempo: ' + song.tempo + ' srednia amp: ' + song.avgBeat);
-            if (req.body.mood == 'relax') {
-                filteredSongs = filteredSongs.filter(song => song.tempo > 0 && song.tempo <= 120)
-            } else if (req.body.mood == 'easy') {
-                filteredSongs = filteredSongs.filter(song => song.tempo > 120 && song.tempo <= 138)
-            } else if (req.body.mood == 'energy') {
-                filteredSongs = filteredSongs.filter(song => song.tempo > 138 && song.tempo <= 200)
+            var moodOfSongCalculated = 10 * ((song.tempo + song.avgBeat) / 350);
+
+            if (!_.has(song, 'moodRanking')) {
+                song['moodRanking'] = moodOfSongCalculated;
             }
         });
+
+        if (req.body.mood == 'relax') {
+            filteredSongs = filteredSongs.filter(song => song.moodRanking > 0 && song.moodRanking <= 4)
+        } else if (req.body.mood == 'easy') {
+            filteredSongs = filteredSongs.filter(song => song.moodRanking > 4 && song.moodRanking <= 7.5)
+        } else if (req.body.mood == 'energy') {
+            filteredSongs = filteredSongs.filter(song => song.moodRanking > 7.5 && song.moodRanking <= 10)
+        }
 
         return res.status(200).send({ data: filteredSongs });
 

@@ -20,7 +20,8 @@ router.post('/', async (req, res) => {
 
     const output = `
         <h1 style="font-weight:normal"><b>Neotic</b>:info</h1>
-        <h3 style="font-weight:normal">${req.body.message}</h5>
+        <h3 style="font-weight:normal">${req.body.message}</h3>
+        <p>Jeśli chcesz zakończyć subskrypcję - wyślij wiadomość 'NEOTIC-OFF'</p>
     `;
 
     let transporter = nodemailer.createTransport({
